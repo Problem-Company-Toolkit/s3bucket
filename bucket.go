@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
+//go:generate <implement mockgen code here>
+
 // Abstraction over interacting with a S3 bucket.
 type Bucket interface {
 	// Downloads the file from the specified bucket path to the specified host path.

@@ -1,4 +1,4 @@
-module github.com/vanharten-surveys/s3bucket
+module github.com/problem-company-toolkit/s3bucket
 
 go 1.19
 
