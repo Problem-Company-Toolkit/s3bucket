@@ -62,43 +62,45 @@ var _ = Describe("Bucket", func() {
 	})
 
 	Describe("DownloadFile", func() {
-		testFile, err := os.Open(FILE_TEST_PATH)
+		It("Should to download the file from S3", func() {
+			testFile, err := os.Open(FILE_TEST_PATH)
 
-		if err != nil {
-			Fail(err.Error())
-			return
-		}
-		defer testFile.Close()
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer testFile.Close()
 
-		_, err = svc.PutObject(&s3.PutObjectInput{
-			Body:   testFile,
-			Key:    aws.String(FILE_TEST_NAME),
-			Bucket: aws.String(S3_BUCKET),
+			_, err = svc.PutObject(&s3.PutObjectInput{
+				Body:   testFile,
+				Key:    aws.String(FILE_TEST_NAME),
+				Bucket: aws.String(S3_BUCKET),
+			})
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			reader, err := bucket.DownloadFile(FILE_TEST_NAME)
+
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(reader).ShouldNot(BeNil())
+			defer reader.Close()
+
+			readerBuf := &bytes.Buffer{}
+			if _, err := io.Copy(readerBuf, reader); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			fileBuf := &bytes.Buffer{}
+			if _, err := io.Copy(fileBuf, testFile); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			Expect(readerBuf.String()).Should(Equal(fileBuf.String()))
 		})
-
-		if err != nil {
-			Fail(err.Error())
-			return
-		}
-
-		reader, err := bucket.DownloadFile(FILE_TEST_NAME)
-
-		Expect(err).ShouldNot(HaveOccurred())
-		Expect(reader).ShouldNot(BeNil())
-		defer reader.Close()
-
-		readerBuf := &bytes.Buffer{}
-		if _, err := io.Copy(readerBuf, reader); err != nil {
-			Fail(err.Error())
-			return
-		}
-
-		fileBuf := &bytes.Buffer{}
-		if _, err := io.Copy(fileBuf, testFile); err != nil {
-			Fail(err.Error())
-			return
-		}
-
-		Expect(readerBuf.String()).Should(Equal(fileBuf.String()))
 	})
 })
