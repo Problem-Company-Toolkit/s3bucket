@@ -2,6 +2,7 @@ package s3bucket
 
 import (
 	"context"
+	"io"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -12,7 +13,7 @@ import (
 // Abstraction over interacting with a S3 bucket.
 type Bucket interface {
 	// Downloads the file from the specified bucket path to the specified host path.
-	DownloadFile(bucketFilepath, hostFilepath string) error
+	DownloadFile(bucketFilepath string) (io.ReadCloser, error)
 
 	// Move file inside the bucket from source to target destination.
 	MoveFile(sourceDest, targetDest string) error
@@ -53,8 +54,8 @@ func NewS3(
 	}
 }
 
-func (b bucket) DownloadFile(bucketFilepath, hostFilepath string) error {
-	return nil
+func (b bucket) DownloadFile(bucketFilepath string) (io.ReadCloser, error) {
+	return nil, nil
 	// Implement the DownloadFile method here using b.downloader.
 }
 
