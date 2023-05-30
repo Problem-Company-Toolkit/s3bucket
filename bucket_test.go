@@ -71,16 +71,16 @@ var _ = Describe("Bucket", func() {
 
 	Describe("DownloadFile", func() {
 		It("Should to download the file from S3", func() {
-			testFile, err := os.Open(FILE_TEST_PATH)
+			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
 				Fail(err.Error())
 				return
 			}
-			defer testFile.Close()
+			defer sendFile.Close()
 
 			_, err = svc.PutObject(&s3.PutObjectInput{
-				Body:   testFile,
+				Body:   sendFile,
 				Key:    aws.String(FILE_TEST_NAME),
 				Bucket: aws.String(S3_BUCKET),
 			})
@@ -102,18 +102,6 @@ var _ = Describe("Bucket", func() {
 				return
 			}
 
-			fileBuf := &bytes.Buffer{}
-			if _, err := io.Copy(fileBuf, testFile); err != nil {
-				Fail(err.Error())
-				return
-			}
-
-			Expect(readerBuf.String()).Should(Equal(fileBuf.String()))
-		})
-	})
-
-	Describe("MoveFile", func() {
-		It("Should to move the file into s3", func() {
 			testFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
@@ -122,8 +110,28 @@ var _ = Describe("Bucket", func() {
 			}
 			defer testFile.Close()
 
+			fileBuf := &bytes.Buffer{}
+			if _, err := io.Copy(fileBuf, testFile); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			Expect(readerBuf.String()).To(Equal(fileBuf.String()))
+		})
+	})
+
+	Describe("MoveFile", func() {
+		It("Should to move the file into s3", func() {
+			sendFile, err := os.Open(FILE_TEST_PATH)
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer sendFile.Close()
+
 			_, err = svc.PutObject(&s3.PutObjectInput{
-				Body:   testFile,
+				Body:   sendFile,
 				Key:    aws.String(FILE_TEST_NAME),
 				Bucket: aws.String(S3_BUCKET),
 			})
@@ -152,6 +160,14 @@ var _ = Describe("Bucket", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			defer obj.Body.Close()
 
+			testFile, err := os.Open(FILE_TEST_PATH)
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer testFile.Close()
+
 			fileBuf := &bytes.Buffer{}
 			if _, err := io.Copy(fileBuf, testFile); err != nil {
 				Fail(err.Error())
@@ -170,16 +186,16 @@ var _ = Describe("Bucket", func() {
 
 	Describe("DeleteFile", func() {
 		It("Should to delete the file from s3", func() {
-			testFile, err := os.Open(FILE_TEST_PATH)
+			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
 				Fail(err.Error())
 				return
 			}
-			defer testFile.Close()
+			defer sendFile.Close()
 
 			_, err = svc.PutObject(&s3.PutObjectInput{
-				Body:   testFile,
+				Body:   sendFile,
 				Key:    aws.String(FILE_TEST_NAME),
 				Bucket: aws.String(S3_BUCKET),
 			})
@@ -204,15 +220,15 @@ var _ = Describe("Bucket", func() {
 
 	Describe("UploadFile", func() {
 		It("Should tu upload a file to s3", func() {
-			testFile, err := os.Open(FILE_TEST_PATH)
+			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
 				Fail(err.Error())
 				return
 			}
-			defer testFile.Close()
+			defer sendFile.Close()
 
-			err = bucket.UploadFile(testFile, FILE_TEST_NAME)
+			err = bucket.UploadFile(sendFile, FILE_TEST_NAME)
 
 			Expect(err).ShouldNot(HaveOccurred())
 
@@ -223,6 +239,14 @@ var _ = Describe("Bucket", func() {
 
 			Expect(err).ShouldNot(HaveOccurred())
 			defer obj.Body.Close()
+
+			testFile, err := os.Open(FILE_TEST_PATH)
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer testFile.Close()
 
 			fileBuf := &bytes.Buffer{}
 			if _, err := io.Copy(fileBuf, testFile); err != nil {
