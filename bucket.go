@@ -89,6 +89,12 @@ func (b bucket) DeleteFile(targetFile string) error {
 	return err
 }
 
-func (b bucket) UploadFile(content io.Writer, targetDest string) error {
-	return nil
+func (b bucket) UploadFile(content io.ReadSeeker, targetDest string) error {
+	_, err := b.svc.PutObject(&s3.PutObjectInput{
+		Body:   content,
+		Bucket: aws.String(b.bucketName),
+		Key:    aws.String(targetDest),
+	})
+
+	return err
 }
