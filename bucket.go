@@ -81,8 +81,12 @@ func (b bucket) MoveFile(sourceDest, targetDest string) error {
 }
 
 func (b bucket) DeleteFile(targetFile string) error {
-	return nil
-	// Implement the DeleteFile method here using b.session.
+	_, err := b.svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(b.bucketName),
+		Key:    aws.String(targetFile),
+	})
+
+	return err
 }
 
 func (b bucket) UploadFile(content io.Writer, targetDest string) error {
