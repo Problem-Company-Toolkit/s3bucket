@@ -201,4 +201,42 @@ var _ = Describe("Bucket", func() {
 			Expect(err).Should(MatchError(ContainSubstring(s3.ErrCodeNoSuchKey)))
 		})
 	})
+
+	Describe("UploadFile", func() {
+		It("Should tu upload a file to s3", func() {
+			testFile, err := os.Open(FILE_TEST_PATH)
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer testFile.Close()
+
+			err = bucket.UploadFile(testFile, FILE_TEST_NAME)
+
+			Expect(err).ShouldNot(HaveOccurred())
+
+			obj, err := svc.GetObject(&s3.GetObjectInput{
+				Bucket: aws.String(S3_BUCKET),
+				Key:    aws.String(FILE_TEST_NAME),
+			})
+
+			Expect(err).ShouldNot(HaveOccurred())
+			defer obj.Body.Close()
+
+			fileBuf := &bytes.Buffer{}
+			if _, err := io.Copy(fileBuf, testFile); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			objBuf := &bytes.Buffer{}
+			if _, err := io.Copy(objBuf, obj.Body); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			Expect(fileBuf.String()).To(Equal(objBuf.String()))
+		})
+	})
 })
