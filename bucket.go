@@ -1,11 +1,11 @@
 package s3bucket
 
 import (
-	"context"
 	"io"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 //go:generate <implement mockgen code here>
@@ -13,7 +13,7 @@ import (
 // Abstraction over interacting with a S3 bucket.
 type Bucket interface {
 	// Downloads the file from the specified bucket path to the specified host path.
-	DownloadFile(bucketFilepath string) (io.ReadCloser, error)
+	DownloadFile(bucketKey string) (io.ReadCloser, error)
 
 	// Move file inside the bucket from source to target destination.
 	MoveFile(sourceDest, targetDest string) error
@@ -25,10 +25,7 @@ type Bucket interface {
 }
 
 type bucket struct {
-	ctx        context.Context
-	session    *session.Session
-	downloader *s3manager.Downloader
-	uploader   *s3manager.Uploader
+	svc        *s3.S3
 	bucketName string
 }
 
@@ -40,23 +37,23 @@ type AWSConfig struct {
 func NewS3(
 	config AWSConfig,
 ) Bucket {
-
-	ctx := context.TODO()
-	downloader := s3manager.NewDownloader(config.Session)
-	uploader := s3manager.NewUploader(config.Session)
-
 	return &bucket{
-		ctx:        ctx,
-		session:    config.Session,
-		downloader: downloader,
-		uploader:   uploader,
+		svc:        s3.New(config.Session),
 		bucketName: config.Bucket,
 	}
 }
 
-func (b bucket) DownloadFile(bucketFilepath string) (io.ReadCloser, error) {
-	return nil, nil
-	// Implement the DownloadFile method here using b.downloader.
+func (b bucket) DownloadFile(bucketKey string) (io.ReadCloser, error) {
+	response, err := b.svc.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String(b.bucketName),
+		Key:    aws.String(bucketKey),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Body, nil
 }
 
 func (b bucket) MoveFile(sourceDest, targetDest string) error {
