@@ -21,7 +21,7 @@ type Bucket interface {
 	// Deletes the target file in the bucket.
 	DeleteFile(targetFile string) error
 
-	UploadFile(content io.Writer, targetDest string) error
+	UploadFile(content io.ReadSeeker, targetDest string) error
 }
 
 type bucket struct {
