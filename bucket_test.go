@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	. "github.com/onsi/ginkgo/v2"
@@ -19,9 +20,12 @@ var _ = Describe("Bucket", func() {
 	)
 
 	var (
-		FILE_TEST_PATH = os.Getenv("FILE_TEST_PATH")
-		AWS_ENDPOINT   = os.Getenv("AWS_ENDPOINT")
-		S3_BUCKET      = os.Getenv("S3_BUCKET")
+		FILE_TEST_PATH        = os.Getenv("FILE_TEST_PATH")
+		AWS_ENDPOINT          = os.Getenv("AWS_ENDPOINT")
+		AWS_REGION            = os.Getenv("AWS_DEFAULT_REGION")
+		AWS_SECRET_ACCESS_KEY = os.Getenv("AWS_SECRET_ACCESS_KEY")
+		AWS_ACCESS_KEY_ID     = os.Getenv("AWS_ACCESS_KEY_ID")
+		S3_BUCKET             = os.Getenv("S3_BUCKET")
 	)
 
 	var (
@@ -33,7 +37,10 @@ var _ = Describe("Bucket", func() {
 	BeforeEach(func() {
 		var err error
 		awsSession, err = session.NewSession(&aws.Config{
-			Endpoint: aws.String(AWS_ENDPOINT),
+			Endpoint:         aws.String(AWS_ENDPOINT),
+			Region:           aws.String(AWS_REGION),
+			Credentials:      credentials.NewStaticCredentials(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ""),
+			S3ForcePathStyle: aws.Bool(true),
 		})
 
 		if err != nil {
