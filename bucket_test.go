@@ -167,4 +167,38 @@ var _ = Describe("Bucket", func() {
 			Expect(fileBuf.String()).To(Equal(objBuf.String()))
 		})
 	})
+
+	Describe("DeleteFile", func() {
+		It("Should to delete the file from s3", func() {
+			testFile, err := os.Open(FILE_TEST_PATH)
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer testFile.Close()
+
+			_, err = svc.PutObject(&s3.PutObjectInput{
+				Body:   testFile,
+				Key:    aws.String(FILE_TEST_NAME),
+				Bucket: aws.String(S3_BUCKET),
+			})
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			err = bucket.DeleteFile(FILE_TEST_NAME)
+
+			Expect(err).ShouldNot(HaveOccurred())
+
+			_, err = svc.GetObject(&s3.GetObjectInput{
+				Bucket: aws.String(S3_BUCKET),
+				Key:    aws.String(FILE_TEST_NAME),
+			})
+
+			Expect(err).Should(MatchError(ContainSubstring(s3.ErrCodeNoSuchKey)))
+		})
+	})
 })
