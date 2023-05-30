@@ -21,7 +21,7 @@ type Bucket interface {
 	// Deletes the target file in the bucket.
 	DeleteFile(targetFile string) error
 
-	UploadFile(hostPath string, targetDest string) error
+	UploadFile(content io.Writer, targetDest string) error
 }
 
 type bucket struct {
@@ -69,6 +69,6 @@ func (b bucket) DeleteFile(targetFile string) error {
 	// Implement the DeleteFile method here using b.session.
 }
 
-func (b bucket) UploadFile(hostPath string, targetDest string) error {
+func (b bucket) UploadFile(content io.Writer, targetDest string) error {
 	return nil
 }
