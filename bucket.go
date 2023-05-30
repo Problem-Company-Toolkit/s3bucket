@@ -1,6 +1,7 @@
 package s3bucket
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -57,8 +58,26 @@ func (b bucket) DownloadFile(bucketKey string) (io.ReadCloser, error) {
 }
 
 func (b bucket) MoveFile(sourceDest, targetDest string) error {
+	_, err := b.svc.CopyObject(&s3.CopyObjectInput{
+		Bucket:     aws.String(b.bucketName),
+		Key:        aws.String(targetDest),
+		CopySource: aws.String(fmt.Sprintf("%s/%s", b.bucketName, sourceDest)),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	_, err = b.svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(b.bucketName),
+		Key:    aws.String(sourceDest),
+	})
+
+	if err != nil {
+		return err
+	}
+
 	return nil
-	// Implement the MoveFile method here using b.uploader and b.downloader.
 }
 
 func (b bucket) DeleteFile(targetFile string) error {
