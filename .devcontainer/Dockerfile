@@ -24,4 +24,4 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
 USER vscode
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@2.9.5
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.9.5
