@@ -26,3 +26,22 @@ services:
 
     networks:
       - s3bucket
+
+  localstack:
+    localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      EAGER_SERVICE_LOADING: 1
+      PERSISTENCE: 1
+      DOCKER_HOST: unix:///var/run/docker.sock
+      START_WEB: 1
+      # Custom scripts dependencies
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION}"
+      S3_BUCKET: "${S3_BUCKET}"
+    networks:
+      - s3bucket
+    volumes:
+      - ./setup/localstack.sh:/etc/localstack/init/ready.d/localstack.sh
+      - /var/run/docker.sock:/var/run/docker.sock
