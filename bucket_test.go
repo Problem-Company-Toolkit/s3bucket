@@ -16,7 +16,8 @@ import (
 
 var _ = Describe("Bucket", func() {
 	const (
-		FILE_TEST_NAME = "file-test.txt"
+		FILE_TEST_NAME       = "file-test.txt"
+		MOVED_FILE_TEST_NAME = "moved-file.txt"
 	)
 
 	var (
@@ -108,6 +109,62 @@ var _ = Describe("Bucket", func() {
 			}
 
 			Expect(readerBuf.String()).Should(Equal(fileBuf.String()))
+		})
+	})
+
+	Describe("MoveFile", func() {
+		It("Should to move the file into s3", func() {
+			testFile, err := os.Open(FILE_TEST_PATH)
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+			defer testFile.Close()
+
+			_, err = svc.PutObject(&s3.PutObjectInput{
+				Body:   testFile,
+				Key:    aws.String(FILE_TEST_NAME),
+				Bucket: aws.String(S3_BUCKET),
+			})
+
+			if err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			err = bucket.MoveFile(FILE_TEST_NAME, MOVED_FILE_TEST_NAME)
+
+			Expect(err).ShouldNot(HaveOccurred())
+
+			_, err = svc.GetObject(&s3.GetObjectInput{
+				Bucket: aws.String(S3_BUCKET),
+				Key:    aws.String(FILE_TEST_NAME),
+			})
+
+			Expect(err).Should(MatchError(ContainSubstring(s3.ErrCodeNoSuchKey)))
+
+			obj, err := svc.GetObject(&s3.GetObjectInput{
+				Bucket: aws.String(S3_BUCKET),
+				Key:    aws.String(MOVED_FILE_TEST_NAME),
+			})
+
+			Expect(err).ShouldNot(HaveOccurred())
+			defer obj.Body.Close()
+
+			fileBuf := &bytes.Buffer{}
+			if _, err := io.Copy(fileBuf, testFile); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			objBuf := &bytes.Buffer{}
+			if _, err := io.Copy(objBuf, obj.Body); err != nil {
+				Fail(err.Error())
+				return
+			}
+
+			Expect(fileBuf.String()).To(Equal(objBuf.String()))
 		})
 	})
 })
