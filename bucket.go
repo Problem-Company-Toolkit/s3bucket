@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-//go:generate <implement mockgen code here>
+//go:generate mockgen -destination=mocks/mock_bucket.go -package=mocks github.com/problem-company-toolkit/s3bucket Bucket
 
 // Abstraction over interacting with a S3 bucket.
 type Bucket interface {
