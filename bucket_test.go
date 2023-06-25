@@ -2,8 +2,10 @@ package s3bucket_test
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -70,7 +72,7 @@ var _ = Describe("Bucket", func() {
 	})
 
 	Describe("DownloadFile", func() {
-		It("Should to download the file from S3", func() {
+		It("Downloads the file from S3", func() {
 			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
@@ -121,7 +123,7 @@ var _ = Describe("Bucket", func() {
 	})
 
 	Describe("MoveFile", func() {
-		It("Should to move the file into s3", func() {
+		It("Moves a file in s3", func() {
 			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
@@ -185,7 +187,7 @@ var _ = Describe("Bucket", func() {
 	})
 
 	Describe("DeleteFile", func() {
-		It("Should to delete the file from s3", func() {
+		It("Deletes a file from s3", func() {
 			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
@@ -219,7 +221,7 @@ var _ = Describe("Bucket", func() {
 	})
 
 	Describe("UploadFile", func() {
-		It("Should tu upload a file to s3", func() {
+		It("Uploads a file to s3", func() {
 			sendFile, err := os.Open(FILE_TEST_PATH)
 
 			if err != nil {
@@ -261,6 +263,16 @@ var _ = Describe("Bucket", func() {
 			}
 
 			Expect(fileBuf.String()).To(Equal(objBuf.String()))
+		})
+	})
+
+	Describe("GetSignedUrl", func() {
+		It("Generates a signed URL for an object", func() {
+			signed, err := bucket.GetSignedUrl(FILE_TEST_NAME, time.Minute*5)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(signed).ShouldNot(BeEmpty())
+
+			fmt.Printf("signed url: %s\n", signed)
 		})
 	})
 })

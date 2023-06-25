@@ -3,6 +3,7 @@ package s3bucket
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -22,7 +23,11 @@ type Bucket interface {
 	// Deletes the target file in the bucket.
 	DeleteFile(targetFile string) error
 
+	// Uplodates a file to the configured S3 bucket.
 	UploadFile(content io.ReadSeeker, targetDest string) error
+
+	// Gets a signed URL that allows public access to a resource. Expires after the provided duration.
+	GetSignedUrl(bucketKey string, duration time.Duration) (string, error)
 }
 
 type bucket struct {
@@ -97,4 +102,14 @@ func (b bucket) UploadFile(content io.ReadSeeker, targetDest string) error {
 	})
 
 	return err
+}
+
+func (b bucket) GetSignedUrl(bucketKey string, duration time.Duration) (out string, err error) {
+	req, _ := b.svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(b.bucketName),
+		Key:    aws.String(bucketKey),
+	})
+
+	out, err = req.Presign(duration)
+	return out, err
 }
